@@ -2,6 +2,7 @@ package services
 
 import (
 	"go-kpl/internal/application/dto"
+	"go-kpl/internal/domain/models"
 	"go-kpl/internal/domain/repository"
 
 	"golang.org/x/net/context"
@@ -11,7 +12,6 @@ type (
 	UserService interface {
 		Register(ctx context.Context, req dto.UserRegistrationDto) (dto.UserResponseDto, error)
 		Login(ctx context.Context, req dto.UserLoginDto) (dto.UserResponseDto, error)
-		GetByEmail(ctx context.Context, req dto.UserGetByEmailDto) (dto.UserResponseDto, error)
 	}
 
 	userService struct {
@@ -24,13 +24,33 @@ func NewUserService(userRepository repository.UserRepository) UserService {
 }
 
 func (s *userService) Register(ctx context.Context, req dto.UserRegistrationDto) (dto.UserResponseDto, error) {
-	return dto.UserResponseDto{}, nil
+
+	createUser, err := s.userRepository.Create(ctx, nil, models.User{
+		Username: req.Username,
+		Email:    req.Email,
+		Password: req.Password,
+		Gender:   models.Gender(req.Gender),
+	})
+
+	if err != nil {
+		return dto.UserResponseDto{}, err
+	}
+
+	return dto.UserResponseDto{
+		Id:    createUser.Id.String(),
+		Email: createUser.Email,
+	}, nil
 }
 
 func (s *userService) Login(ctx context.Context, req dto.UserLoginDto) (dto.UserResponseDto, error) {
-	return dto.UserResponseDto{}, nil
-}
 
-func (s *userService) GetByEmail(ctx context.Context, req dto.UserGetByEmailDto) (dto.UserResponseDto, error) {
-	return dto.UserResponseDto{}, nil
+	findUser, err := s.userRepository.GetByEmail(ctx, nil, req.Email, req.Password)
+	if err != nil {
+		return dto.UserResponseDto{}, err
+	}
+
+	return dto.UserResponseDto{
+		Id:    findUser.Id.String(),
+		Email: findUser.Email,
+	}, nil
 }

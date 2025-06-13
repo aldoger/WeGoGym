@@ -3,6 +3,8 @@ package response
 import (
 	myerror "go-kpl/internal/pkg/errors"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Response struct {
@@ -37,4 +39,14 @@ func NewFailed(msg string, err error, meta ...any) Response {
 	}
 
 	return res
+}
+
+func (r Response) Send(ctx *gin.Context) {
+	sendStatus := r.StatusCode
+	ctx.JSON(sendStatus, r)
+}
+
+func (r Response) SendWithAbort(ctx *gin.Context) {
+	sendStatus := r.StatusCode
+	ctx.AbortWithStatusJSON(sendStatus, r)
 }
