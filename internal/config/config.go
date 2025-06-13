@@ -1,6 +1,10 @@
 package config
 
-import "github.com/gin-gonic/gin"
+import (
+	"go-kpl/internal/presentation/middleware"
+
+	"github.com/gin-gonic/gin"
+)
 
 type RestServer struct {
 	Engine *gin.Engine
@@ -16,6 +20,7 @@ func NewGinServer() *RestServer {
 			"error": "Not Found",
 		})
 	})
+	engine.Use(middleware.CORSMiddleware())
 
 	return &RestServer{
 		Engine: engine,
