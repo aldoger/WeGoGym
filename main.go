@@ -1,12 +1,23 @@
 package main
 
 import (
+	"go-kpl/cmd"
 	"go-kpl/internal/config"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	if err := godotenv.Load(); err != nil {
+		panic("Failed to loading env file")
+	}
+
+	if err := cmd.Commands(); err != nil {
+		panic("Failed to get Commands: " + err.Error())
+	}
+
 	ginServer := config.NewGinServer()
 
 	ginServer.Engine.Any("/ping", func(ctx *gin.Context) {
@@ -14,5 +25,6 @@ func main() {
 			"message": "pong",
 		})
 	})
+
 	ginServer.Run(":8080")
 }

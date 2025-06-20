@@ -15,4 +15,5 @@ type UserLoginDto struct {
 type UserResponseDto struct {
 	Id    string `json:"id"`
 	Email string `json:"email"`
+	Role  string `json:"role,omitempty"`
 }

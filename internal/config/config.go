@@ -1,7 +1,12 @@
 package config
 
 import (
+	"go-kpl/database"
+	"go-kpl/internal/application/services"
+	"go-kpl/internal/domain/repository"
+	"go-kpl/internal/presentation/controllers"
 	"go-kpl/internal/presentation/middleware"
+	"go-kpl/internal/router"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,6 +17,7 @@ type RestServer struct {
 
 func NewGinServer() *RestServer {
 
+	db := database.New()
 	engine := gin.Default()
 	engine.Use(gin.Logger())
 	engine.Use(gin.Recovery())
@@ -21,6 +27,16 @@ func NewGinServer() *RestServer {
 		})
 	})
 	engine.Use(middleware.CORSMiddleware())
+
+	var (
+		userRepository repository.UserRepository = repository.NewUserRepository(db)
+
+		userService services.UserService = services.NewUserService(userRepository)
+
+		userController controllers.UserController = controllers.NewUserController(userService)
+	)
+
+	router.User(engine, userController)
 
 	return &RestServer{
 		Engine: engine,

@@ -14,12 +14,15 @@ type (
 	UserController interface {
 		Register(ctx *gin.Context)
 		Login(ctx *gin.Context)
+		GetMe(ctx *gin.Context)
 	}
 
 	userController struct {
 		userService services.UserService
 	}
 )
+
+const MAX_AGE = 259200
 
 func NewUserController(userService services.UserService) UserController {
 	return &userController{
@@ -56,7 +59,25 @@ func (c *userController) Login(ctx *gin.Context) {
 		return
 	}
 
-	//TODO cookie send
+	ctx.SetCookie("id", user.Id, MAX_AGE, "/", "", false, true)
+	ctx.SetCookie("email", user.Email, MAX_AGE, "/", "", false, true)
+	ctx.SetCookie("role", user.Role, MAX_AGE, "/", "", false, true)
 
 	response.NewSuccess("login successfully", user).Send(ctx)
+}
+
+func (c *userController) GetMe(ctx *gin.Context) {
+
+	userId, err := ctx.Cookie("id")
+	if err != nil {
+		response.NewFailed("Id user not found in cookie", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
+		return
+	}
+
+	user, err := c.userService.GetMeData(ctx, userId)
+	if err != nil {
+		response.NewFailed("failed to retrive user data", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
+	}
+
+	response.NewSuccess("data successfuly retrive", user).Send(ctx)
 }

@@ -12,6 +12,7 @@ type (
 	UserService interface {
 		Register(ctx context.Context, req dto.UserRegistrationDto) (dto.UserResponseDto, error)
 		Login(ctx context.Context, req dto.UserLoginDto) (dto.UserResponseDto, error)
+		GetMeData(ctx context.Context, userId string) (dto.UserResponseDto, error)
 	}
 
 	userService struct {
@@ -52,5 +53,20 @@ func (s *userService) Login(ctx context.Context, req dto.UserLoginDto) (dto.User
 	return dto.UserResponseDto{
 		Id:    findUser.Id.String(),
 		Email: findUser.Email,
+		Role:  string(findUser.Role),
+	}, nil
+}
+
+func (s *userService) GetMeData(ctx context.Context, userId string) (dto.UserResponseDto, error) {
+
+	userData, err := s.userRepository.GetById(ctx, nil, userId)
+	if err != nil {
+		return dto.UserResponseDto{}, err
+	}
+
+	return dto.UserResponseDto{
+		Id:    userData.Id.String(),
+		Email: userData.Email,
+		Role:  string(userData.Role),
 	}, nil
 }
