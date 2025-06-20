@@ -4,6 +4,7 @@ import (
 	"go-kpl/internal/application/dto"
 	"go-kpl/internal/domain/models"
 	"go-kpl/internal/domain/repository"
+	valueobject "go-kpl/internal/domain/value_object"
 
 	"golang.org/x/net/context"
 )
@@ -26,11 +27,17 @@ func NewUserService(userRepository repository.UserRepository) UserService {
 
 func (s *userService) Register(ctx context.Context, req dto.UserRegistrationDto) (dto.UserResponseDto, error) {
 
+	role, err := valueobject.NewUserRole(valueobject.MEMBER_ROLE)
+	if err != nil {
+		return dto.UserResponseDto{}, err
+	}
+
 	createUser, err := s.userRepository.Create(ctx, nil, models.User{
 		Username: req.Username,
 		Email:    req.Email,
 		Password: req.Password,
 		Gender:   models.Gender(req.Gender),
+		Role:     role,
 	})
 
 	if err != nil {
@@ -53,7 +60,7 @@ func (s *userService) Login(ctx context.Context, req dto.UserLoginDto) (dto.User
 	return dto.UserResponseDto{
 		Id:    findUser.Id.String(),
 		Email: findUser.Email,
-		Role:  string(findUser.Role),
+		Role:  findUser.Role.GetRole(),
 	}, nil
 }
 
@@ -67,6 +74,6 @@ func (s *userService) GetMeData(ctx context.Context, userId string) (dto.UserRes
 	return dto.UserResponseDto{
 		Id:    userData.Id.String(),
 		Email: userData.Email,
-		Role:  string(userData.Role),
+		Role:  userData.Role.GetRole(),
 	}, nil
 }
