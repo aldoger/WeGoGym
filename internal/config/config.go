@@ -1,7 +1,7 @@
 package config
 
 import (
-	"go-kpl/database"
+	"go-kpl/infrastructure/database"
 	"go-kpl/internal/application/services"
 	"go-kpl/internal/domain/repository"
 	"go-kpl/internal/presentation/controllers"

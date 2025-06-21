@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"go-kpl/database"
+	"go-kpl/infrastructure/database"
 	"os"
 
-	"go-kpl/database/migration"
+	"go-kpl/infrastructure/database/migration"
 	mylog "go-kpl/internal/pkg/logger"
 
 	"gorm.io/gorm"
