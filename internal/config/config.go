@@ -29,14 +29,18 @@ func NewGinServer() *RestServer {
 	engine.Use(middleware.CORSMiddleware())
 
 	var (
-		userRepository repository.UserRepository = repository.NewUserRepository(db)
+		userRepository       repository.UserRepository       = repository.NewUserRepository(db)
+		membershipRepository repository.MembershipRepository = repository.NewMembershipRepository(db)
 
-		userService services.UserService = services.NewUserService(userRepository)
+		userService      services.UserService       = services.NewUserService(userRepository)
+		membersipService services.MembershipService = services.NewMembershipService(membershipRepository)
 
-		userController controllers.UserController = controllers.NewUserController(userService)
+		userController       controllers.UserController       = controllers.NewUserController(userService)
+		membershipController controllers.MembershipController = controllers.NewMembershipController(membersipService)
 	)
 
 	router.User(engine, userController)
+	router.Membership(engine, membershipController)
 
 	return &RestServer{
 		Engine: engine,

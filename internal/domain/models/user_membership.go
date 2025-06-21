@@ -16,3 +16,7 @@ type UserMembership struct {
 	UpdatedAt time.Time
 	DeleteAt  gorm.DeletedAt
 }
+
+func (UserMembership) Tablename() string {
+	return "User Membership"
+}

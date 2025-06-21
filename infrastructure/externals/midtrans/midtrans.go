@@ -14,26 +14,27 @@ type MidtransClient struct {
 	Client snap.Client
 }
 
-func (m *MidtransClient) CreateTransaction(kode string) (*snap.Response, error) {
+func (m *MidtransClient) CreateTransaction(price float64, email string, kode string) (string, error) {
 	m.Client.New(os.Getenv("MIDTRANS_SERVER_KEY"), midtrans.Sandbox)
 
 	orderID := uuid.New().String()
 
+	var PriceInt = int64(price)
+
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
 			OrderID:  orderID,
-			GrossAmt: 200000,
+			GrossAmt: PriceInt,
 		},
 		CustomerDetail: &midtrans.CustomerDetails{
-			FName: "Customer",
-			Email: "customer@example.com",
+			Email: email,
 		},
 	}
 
 	snapResp, err := m.Client.CreateTransaction(req)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return snapResp, nil
+	return snapResp.Token, nil
 }

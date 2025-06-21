@@ -62,6 +62,7 @@ func (c *userController) Login(ctx *gin.Context) {
 	ctx.SetCookie("id", user.Id, MAX_AGE, "/", "", false, true)
 	ctx.SetCookie("email", user.Email, MAX_AGE, "/", "", false, true)
 	ctx.SetCookie("role", user.Role, MAX_AGE, "/", "", false, true)
+	ctx.SetCookie("username", user.Username, MAX_AGE, "/", "", false, true)
 
 	response.NewSuccess("login successfully", user).Send(ctx)
 }

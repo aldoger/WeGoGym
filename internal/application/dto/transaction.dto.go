@@ -8,5 +8,4 @@ type TransactionRequestDto struct {
 
 type TransactionResponseDto struct {
 	TokenTransaksi string `json:"token"`
-	UrlRedirect    string `json:"url_redirect"`
 }

@@ -9,7 +9,7 @@ import (
 
 type (
 	TransactionService interface {
-		CreateTransaction(ctx context.Context, req dto.TransactionRequestDto) (dto.TransactionResponseDto, error)
+		CreateTransaction(ctx context.Context, req dto.TransactionRequestDto, email string) (dto.TransactionResponseDto, error)
 	}
 
 	transactionService struct {
@@ -21,15 +21,14 @@ func NewTransactionService(midtrans midtrans.MidtransClient) TransactionService 
 	return &transactionService{midtrans: midtrans}
 }
 
-func (m *transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequestDto) (dto.TransactionResponseDto, error) {
+func (m *transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequestDto, email string) (dto.TransactionResponseDto, error) {
 
-	transaction, err := m.midtrans.CreateTransaction(req.Kode)
+	transactionToken, err := m.midtrans.CreateTransaction(req.Price, email, req.Kode)
 	if err != nil {
 		return dto.TransactionResponseDto{}, err
 	}
 
 	return dto.TransactionResponseDto{
-		TokenTransaksi: transaction.Token,
-		UrlRedirect:    transaction.RedirectURL,
+		TokenTransaksi: transactionToken,
 	}, nil
 }
