@@ -3,6 +3,7 @@ package services
 import (
 	"go-kpl/infrastructure/externals/midtrans"
 	"go-kpl/internal/application/dto"
+	"go-kpl/internal/domain/repository"
 
 	"golang.org/x/net/context"
 )
@@ -13,22 +14,29 @@ type (
 	}
 
 	transactionService struct {
-		midtrans midtrans.MidtransClient
+		midtrans             *midtrans.MidtransClient
+		membershipRepository repository.MembershipRepository
 	}
 )
 
-func NewTransactionService(midtrans midtrans.MidtransClient) TransactionService {
-	return &transactionService{midtrans: midtrans}
+func NewTransactionService(midtrans *midtrans.MidtransClient, membershipRepository repository.MembershipRepository) TransactionService {
+	return &transactionService{midtrans: midtrans, membershipRepository: membershipRepository}
 }
 
 func (m *transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequestDto, email string) (dto.TransactionResponseDto, error) {
 
-	transactionToken, err := m.midtrans.CreateTransaction(req.Price, email, req.Kode)
+	membershipDetail, err := m.membershipRepository.GetById(ctx, nil, req.MembershipId)
+	if err != nil {
+		return dto.TransactionResponseDto{}, err
+	}
+
+	transaction, err := m.midtrans.CreateTransaction(email, req.Kode, membershipDetail)
 	if err != nil {
 		return dto.TransactionResponseDto{}, err
 	}
 
 	return dto.TransactionResponseDto{
-		TokenTransaksi: transactionToken,
+		TokenTransaksi: transaction.Token,
+		RedirectUrl:    transaction.RedirectURL,
 	}, nil
 }

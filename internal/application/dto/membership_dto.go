@@ -7,7 +7,7 @@ type MembershipRequestDto struct {
 }
 
 type UpdateMembershipRequestDto struct {
-	Id       string `json:"id" binding:"required"`
+	Id       string `json:"id"`
 	Duration *int   `json:"duration,omitempty"`
 	Price    *int   `json:"price,omitempty"`
 }
