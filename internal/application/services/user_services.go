@@ -72,11 +72,15 @@ func (s *userService) GetMeData(ctx context.Context, userId string) (dto.UserRes
 	if err != nil {
 		return dto.UserResponseDto{}, err
 	}
-
+	//TODO jangan lupa buat interface baru untuk ambil usermembership sekalian
 	return dto.UserResponseDto{
 		Id:       userData.Id.String(),
 		Email:    userData.Email,
 		Role:     userData.Role.GetRole(),
 		Username: userData.Username,
+		UserMembership: dto.UserMembershipResponseDto{
+			Id:        userData.UserMembership.Id.String(),
+			ExpiredAt: userData.UserMembership.ExpiredAt,
+		},
 	}, nil
 }

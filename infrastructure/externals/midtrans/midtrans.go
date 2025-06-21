@@ -1,7 +1,6 @@
 package midtrans
 
 import (
-	"fmt"
 	"go-kpl/internal/domain/models"
 	"os"
 
@@ -57,8 +56,6 @@ func (m *MidtransClient) CreateTransaction(email string, kode string, membership
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(snapResp)
 
 	return snapResp, nil
 }

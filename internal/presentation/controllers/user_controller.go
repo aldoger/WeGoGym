@@ -22,7 +22,7 @@ type (
 	}
 )
 
-const MAX_AGE = 259200
+const MAX_AGE = 259200 // 3 hari
 
 func NewUserController(userService services.UserService) UserController {
 	return &userController{

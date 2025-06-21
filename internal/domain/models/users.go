@@ -23,7 +23,7 @@ type User struct {
 	Password       string               `json:"password"`
 	Gender         Gender               `json:"gender"`
 	Role           valueobject.UserRole `json:"role"`
-	UserMembership UserMembership       `json:"user_membership_id" gorm:"foreignKey:UserId;references:Id"`
+	UserMembership *UserMembership      `json:"user_membership_id" gorm:"foreignKey:UserId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

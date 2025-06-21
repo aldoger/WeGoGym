@@ -43,8 +43,10 @@ func (r *userRepository) GetById(ctx context.Context, tx *gorm.DB, userId string
 	}
 
 	var user models.User
-	if err := tx.WithContext(ctx).Take(&user, "id = ?", userId).Error; err != nil {
-		return models.User{}, nil
+	if err := tx.WithContext(ctx).
+		Preload("UserMembership").
+		Take(&user, "id = ?", userId).Error; err != nil {
+		return models.User{}, err
 	}
 
 	return user, nil

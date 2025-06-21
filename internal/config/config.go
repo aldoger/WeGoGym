@@ -31,21 +31,25 @@ func NewGinServer() *RestServer {
 	engine.Use(middleware.CORSMiddleware())
 
 	var (
-		userRepository       repository.UserRepository       = repository.NewUserRepository(db)
-		membershipRepository repository.MembershipRepository = repository.NewMembershipRepository(db)
+		userRepository           repository.UserRepository           = repository.NewUserRepository(db)
+		membershipRepository     repository.MembershipRepository     = repository.NewMembershipRepository(db)
+		userMembershipRepository repository.UserMembershipRepository = repository.NewUserMembershipRepository(db)
 
-		userService        services.UserService        = services.NewUserService(userRepository)
-		membersipService   services.MembershipService  = services.NewMembershipService(membershipRepository)
-		transactionService services.TransactionService = services.NewTransactionService(midtransClient, membershipRepository)
+		userService           services.UserService           = services.NewUserService(userRepository)
+		membersipService      services.MembershipService     = services.NewMembershipService(membershipRepository)
+		userMembershipService services.UserMembershipService = services.NewUserMembershipService(userMembershipRepository, membershipRepository)
+		transactionService    services.TransactionService    = services.NewTransactionService(midtransClient, membershipRepository)
 
-		userController        controllers.UserController        = controllers.NewUserController(userService)
-		membershipController  controllers.MembershipController  = controllers.NewMembershipController(membersipService)
-		transactionController controllers.TransactionController = controllers.NewTransactionController(transactionService)
+		userController           controllers.UserController           = controllers.NewUserController(userService)
+		membershipController     controllers.MembershipController     = controllers.NewMembershipController(membersipService)
+		userMembershipController controllers.UserMembershipController = controllers.NewUserMembershipController(userMembershipService)
+		transactionController    controllers.TransactionController    = controllers.NewTransactionController(transactionService)
 	)
 
 	router.User(engine, userController)
 	router.Membership(engine, membershipController)
 	router.Transaction(engine, transactionController)
+	router.UserMembership(engine, userMembershipController)
 
 	return &RestServer{
 		Engine: engine,

@@ -13,8 +13,9 @@ type UserLoginDto struct {
 }
 
 type UserResponseDto struct {
-	Id       string `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Role     string `json:"role,omitempty"`
+	Id             string                    `json:"id"`
+	Username       string                    `json:"username"`
+	Email          string                    `json:"email"`
+	Role           string                    `json:"role,omitempty"`
+	UserMembership UserMembershipResponseDto `json:"user_membership,omitempty"`
 }

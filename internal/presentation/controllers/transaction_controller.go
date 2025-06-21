@@ -45,5 +45,5 @@ func (c *transactionController) CreateTransaction(ctx *gin.Context) {
 		return
 	}
 
-	response.NewSuccess("Transation successfully process", transaction)
+	response.NewSuccess("Transation successfully process", transaction).Send(ctx)
 }
