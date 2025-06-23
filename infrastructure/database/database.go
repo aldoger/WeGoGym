@@ -10,31 +10,39 @@ import (
 )
 
 func New() *gorm.DB {
-	DBHost := os.Getenv("DB_HOST")
-	DBUser := os.Getenv("DB_USER")
-	DBPassword := os.Getenv("DB_PASS")
-	DBName := os.Getenv("DB_NAME")
-	DBPort := os.Getenv("DB_PORT")
+	status := os.Getenv("STATUS")
 
-	if DBHost == "" || DBUser == "" || DBPassword == "" || DBName == "" || DBPort == "" {
-		mylog.Panicf("Database environment variables are not properly set")
+	var dbDSN string
+
+	if status == "production" {
+		dbDSN = os.Getenv("DATABASE_URL")
+		if dbDSN == "" {
+			mylog.Panicf("DATABASE_URL is not set for production")
+		}
+	} else {
+		DBHost := os.Getenv("DB_HOST")
+		DBUser := os.Getenv("DB_USER")
+		DBPassword := os.Getenv("DB_PASS")
+		DBName := os.Getenv("DB_NAME")
+		DBPort := os.Getenv("DB_PORT")
+
+		if DBHost == "" || DBUser == "" || DBPassword == "" || DBName == "" || DBPort == "" {
+			mylog.Panicf("Database environment variables are not properly set for development")
+		}
+
+		dbDSN = fmt.Sprintf(
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+			DBHost, DBUser, DBPassword, DBName, DBPort,
+		)
 	}
-
-	DBDSN := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s",
-		DBHost, DBUser, DBPassword, DBName, DBPort,
-	)
 
 	fmt.Println(mylog.ColorizeInfo("\n=========== Setup Database ==========="))
 	mylog.Infof("Connecting to database...")
 
-	db, err := gorm.Open(postgres.New(postgres.Config{
-		DSN:                  DBDSN,
-		PreferSimpleProtocol: true,
-	}), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dbDSN), &gorm.Config{})
 	if err != nil {
-		mylog.Errorf("Failed connect to database")
-		mylog.Panicf("Failed connect to database")
+		mylog.Errorf("Failed to connect to database")
+		mylog.Panicf("Failed to connect to database: %v", err)
 	}
 
 	mylog.Infof("Success connect to database\n")
