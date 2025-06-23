@@ -9,8 +9,6 @@ import (
 	"github.com/midtrans/midtrans-go/snap"
 )
 
-const KODE_REFERAL = "RPLGACORR"
-
 type MidtransClient struct {
 	Client snap.Client
 }
@@ -26,6 +24,8 @@ func (m *MidtransClient) CreateTransaction(email string, kode string, membership
 	orderID := uuid.New().String()
 
 	var PriceInt = int64(membershipDetail.Price)
+
+	var KODE_REFERAL = os.Getenv("KODE_REFERAL")
 
 	if kode != "" && kode == KODE_REFERAL {
 		Discount := (PriceInt * 20) / 100
