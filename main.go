@@ -3,15 +3,18 @@ package main
 import (
 	"go-kpl/cmd"
 	"go-kpl/internal/config"
+	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-
-	if err := godotenv.Load(); err != nil {
-		panic("Failed to loading env file")
+	if os.Getenv("RAILWAY_ENVIRONMENT") == "" {
+		if err := godotenv.Load(); err != nil {
+			log.Println("Warning: .env file not found, using system env variables")
+		}
 	}
 
 	if err := cmd.Commands(); err != nil {
