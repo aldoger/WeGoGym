@@ -2,7 +2,6 @@ package config
 
 import (
 	"go-kpl/infrastructure/database"
-	"go-kpl/infrastructure/database/migration"
 	"go-kpl/infrastructure/externals/midtrans"
 	"go-kpl/internal/application/services"
 	"go-kpl/internal/domain/repository"
@@ -20,7 +19,6 @@ type RestServer struct {
 func NewGinServer() *RestServer {
 
 	db := database.New()
-	migration.Migrate(db)
 	midtransClient := midtrans.NewMidtrans()
 	engine := gin.Default()
 	engine.Use(gin.Logger())
