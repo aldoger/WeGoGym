@@ -12,5 +12,6 @@ func User(server *gin.Engine, controller controllers.UserController) {
 		routes.POST("/register", controller.Register)
 		routes.POST("/login", controller.Login)
 		routes.GET("/me", controller.GetMe)
+		routes.GET("/generate-qr", controller.GenerateQrMe)
 	}
 }

@@ -13,6 +13,7 @@ import (
 type (
 	UserMembershipController interface {
 		CreateUserMembership(ctx *gin.Context)
+		SearchMembership(ctx *gin.Context)
 	}
 
 	userMembershipController struct {
@@ -38,4 +39,21 @@ func (c *userMembershipController) CreateUserMembership(ctx *gin.Context) {
 	}
 
 	response.NewSuccess("user membership created", userMembership).Send(ctx)
+}
+
+func (c *userMembershipController) SearchMembership(ctx *gin.Context) {
+
+	UserId := ctx.Param("id")
+	if UserId == "" {
+		response.NewFailed("user id is not found", myerror.New("Please set your userId", http.StatusBadRequest)).Send(ctx)
+		return
+	}
+
+	User, err := c.userMembershipService.SearchMembership(ctx, UserId)
+	if err != nil {
+		response.NewFailed("user is not found", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
+		return
+	}
+
+	response.NewSuccess("user is a member of the gym", User).Send(ctx)
 }

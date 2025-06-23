@@ -13,16 +13,19 @@ import (
 type (
 	UserMembershipService interface {
 		CreateUserMembership(ctx context.Context, req dto.CreateUserMembershipRequestDto) (dto.UserMembershipResponseDto, error)
+		SearchMembership(ctx context.Context, userId string) (dto.UserResponseDto, error)
 	}
 
 	userMembershipService struct {
 		userMembershipRepository repository.UserMembershipRepository
 		membershipRepository     repository.MembershipRepository
+		userRepository           repository.UserRepository
 	}
 )
 
-func NewUserMembershipService(userMembershipRepository repository.UserMembershipRepository, membershipRepository repository.MembershipRepository) UserMembershipService {
-	return &userMembershipService{userMembershipRepository: userMembershipRepository, membershipRepository: membershipRepository}
+func NewUserMembershipService(userMembershipRepository repository.UserMembershipRepository, membershipRepository repository.MembershipRepository,
+	userRepository repository.UserRepository) UserMembershipService {
+	return &userMembershipService{userMembershipRepository: userMembershipRepository, membershipRepository: membershipRepository, userRepository: userRepository}
 }
 
 func (s *userMembershipService) CreateUserMembership(ctx context.Context, req dto.CreateUserMembershipRequestDto) (dto.UserMembershipResponseDto, error) {
@@ -56,5 +59,29 @@ func (s *userMembershipService) CreateUserMembership(ctx context.Context, req dt
 	return dto.UserMembershipResponseDto{
 		Id:        newUserMembership.Id.String(),
 		ExpiredAt: newUserMembership.ExpiredAt,
+	}, nil
+}
+
+func (s *userMembershipService) SearchMembership(ctx context.Context, userId string) (dto.UserResponseDto, error) {
+
+	UserId, err := s.userMembershipRepository.SearchMember(ctx, nil, userId)
+	if err != nil {
+		return dto.UserResponseDto{}, err
+	}
+
+	User, err := s.userRepository.GetById(ctx, nil, UserId)
+	if err != nil {
+		return dto.UserResponseDto{}, err
+	}
+
+	return dto.UserResponseDto{
+		Id:       User.Id.String(),
+		Username: User.Username,
+		Email:    User.Email,
+		Role:     User.Role.GetRole(),
+		UserMembership: dto.UserMembershipResponseDto{
+			Id:        User.UserMembership.Id.String(),
+			ExpiredAt: User.UserMembership.ExpiredAt,
+		},
 	}, nil
 }

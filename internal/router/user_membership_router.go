@@ -10,5 +10,6 @@ func UserMembership(server *gin.Engine, controller controllers.UserMembershipCon
 	routes := server.Group("/api/user-membership")
 	{
 		routes.POST("/new-membership", controller.CreateUserMembership)
+		routes.GET("/search-membership/:id", controller.SearchMembership)
 	}
 }

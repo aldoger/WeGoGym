@@ -10,6 +10,7 @@ import (
 type (
 	UserMembershipRepository interface {
 		Create(ctx context.Context, tx *gorm.DB, userMembership models.UserMembership) (models.UserMembership, error)
+		SearchMember(ctx context.Context, tx *gorm.DB, userId string) (string, error)
 	}
 
 	userMembershipRepository struct {
@@ -32,4 +33,18 @@ func (r *userMembershipRepository) Create(ctx context.Context, tx *gorm.DB, user
 	}
 
 	return userMembership, nil
+}
+
+func (r *userMembershipRepository) SearchMember(ctx context.Context, tx *gorm.DB, userId string) (string, error) {
+
+	if tx == nil {
+		tx = r.db
+	}
+
+	var UserMembership models.UserMembership
+	if err := tx.WithContext(ctx).First(&UserMembership).Where("user_id = ?", userId).Error; err != nil {
+		return "", err
+	}
+
+	return UserMembership.UserId.String(), nil
 }
