@@ -6,6 +6,9 @@ import (
 	myerror "go-kpl/internal/pkg/errors"
 	"go-kpl/internal/pkg/response"
 	"net/http"
+	"os"
+
+	qrcode "github.com/skip2/go-qrcode"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +18,7 @@ type (
 		Register(ctx *gin.Context)
 		Login(ctx *gin.Context)
 		GetMe(ctx *gin.Context)
+		GenerateQrMe(ctx *gin.Context)
 	}
 
 	userController struct {
@@ -22,7 +26,7 @@ type (
 	}
 )
 
-const MAX_AGE = 259200
+const MAX_AGE = 259200 // 3 hari
 
 func NewUserController(userService services.UserService) UserController {
 	return &userController{
@@ -62,6 +66,7 @@ func (c *userController) Login(ctx *gin.Context) {
 	ctx.SetCookie("id", user.Id, MAX_AGE, "/", "", false, true)
 	ctx.SetCookie("email", user.Email, MAX_AGE, "/", "", false, true)
 	ctx.SetCookie("role", user.Role, MAX_AGE, "/", "", false, true)
+	ctx.SetCookie("username", user.Username, MAX_AGE, "/", "", false, true)
 
 	response.NewSuccess("login successfully", user).Send(ctx)
 }
@@ -80,4 +85,22 @@ func (c *userController) GetMe(ctx *gin.Context) {
 	}
 
 	response.NewSuccess("data successfuly retrive", user).Send(ctx)
+}
+
+func (c *userController) GenerateQrMe(ctx *gin.Context) {
+	UserId, err := ctx.Cookie("id")
+	if err != nil {
+		response.NewFailed("user id is not found", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
+		return
+	}
+
+	endpoint := os.Getenv("BASE_URL") + "/api/user-membership/search-membership/" + UserId
+
+	pngQR, err := qrcode.Encode(endpoint, qrcode.Medium, 256)
+	if err != nil {
+		response.NewFailed("failed to generate QR code", myerror.New(err.Error(), http.StatusInternalServerError)).Send(ctx)
+		return
+	}
+
+	ctx.Data(http.StatusOK, "image/png", pngQR)
 }

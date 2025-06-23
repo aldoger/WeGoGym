@@ -1,6 +1,7 @@
 package midtrans
 
 import (
+	"go-kpl/internal/domain/models"
 	"os"
 
 	"github.com/google/uuid"
@@ -8,26 +9,47 @@ import (
 	"github.com/midtrans/midtrans-go/snap"
 )
 
-const KODE_REFERAL = "RPLGACORR"
-
 type MidtransClient struct {
 	Client snap.Client
 }
 
-func (m *MidtransClient) CreateTransaction(kode string) (*snap.Response, error) {
-	m.Client.New(os.Getenv("MIDTRANS_SERVER_KEY"), midtrans.Sandbox)
+func NewMidtrans() *MidtransClient {
+	var NewClient snap.Client
+	NewClient.New(os.Getenv("MIDTRANS_SERVER_KEY"), midtrans.Sandbox)
+	return &MidtransClient{Client: NewClient}
+}
+
+func (m *MidtransClient) CreateTransaction(email string, kode string, membershipDetail models.Membership) (*snap.Response, error) {
 
 	orderID := uuid.New().String()
+
+	var PriceInt = int64(membershipDetail.Price)
+
+	var KODE_REFERAL = os.Getenv("KODE_REFERAL")
+
+	if kode != "" && kode == KODE_REFERAL {
+		Discount := (PriceInt * 20) / 100
+		PriceInt -= Discount
+	}
+
+	items := []midtrans.ItemDetails{
+		{
+			ID:    membershipDetail.Id.String(),
+			Name:  membershipDetail.Type + " Membership",
+			Price: PriceInt,
+			Qty:   1,
+		},
+	}
 
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
 			OrderID:  orderID,
-			GrossAmt: 200000,
+			GrossAmt: PriceInt,
 		},
 		CustomerDetail: &midtrans.CustomerDetails{
-			FName: "Customer",
-			Email: "customer@example.com",
+			Email: email,
 		},
+		Items: &items,
 	}
 
 	snapResp, err := m.Client.CreateTransaction(req)

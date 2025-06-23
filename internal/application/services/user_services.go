@@ -45,8 +45,9 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegistrationDto)
 	}
 
 	return dto.UserResponseDto{
-		Id:    createUser.Id.String(),
-		Email: createUser.Email,
+		Id:       createUser.Id.String(),
+		Email:    createUser.Email,
+		Username: createUser.Username,
 	}, nil
 }
 
@@ -58,9 +59,10 @@ func (s *userService) Login(ctx context.Context, req dto.UserLoginDto) (dto.User
 	}
 
 	return dto.UserResponseDto{
-		Id:    findUser.Id.String(),
-		Email: findUser.Email,
-		Role:  findUser.Role.GetRole(),
+		Id:       findUser.Id.String(),
+		Email:    findUser.Email,
+		Role:     findUser.Role.GetRole(),
+		Username: findUser.Username,
 	}, nil
 }
 
@@ -70,10 +72,15 @@ func (s *userService) GetMeData(ctx context.Context, userId string) (dto.UserRes
 	if err != nil {
 		return dto.UserResponseDto{}, err
 	}
-
+	//TODO jangan lupa buat interface baru untuk ambil usermembership sekalian
 	return dto.UserResponseDto{
-		Id:    userData.Id.String(),
-		Email: userData.Email,
-		Role:  userData.Role.GetRole(),
+		Id:       userData.Id.String(),
+		Email:    userData.Email,
+		Role:     userData.Role.GetRole(),
+		Username: userData.Username,
+		UserMembership: dto.UserMembershipResponseDto{
+			Id:        userData.UserMembership.Id.String(),
+			ExpiredAt: userData.UserMembership.ExpiredAt,
+		},
 	}, nil
 }
