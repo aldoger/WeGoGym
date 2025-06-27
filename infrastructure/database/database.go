@@ -16,6 +16,7 @@ func New() *gorm.DB {
 
 	if status == "production" {
 		dbDSN = os.Getenv("DATABASE_URL")
+		fmt.Println("Connect external")
 		if dbDSN == "" {
 			mylog.Panicf("DATABASE_URL is not set for production")
 		}

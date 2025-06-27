@@ -20,12 +20,13 @@ type (
 		userMembershipRepository repository.UserMembershipRepository
 		membershipRepository     repository.MembershipRepository
 		userRepository           repository.UserRepository
+		entryHistoryRepository   repository.EntryHistoryRepository
 	}
 )
 
 func NewUserMembershipService(userMembershipRepository repository.UserMembershipRepository, membershipRepository repository.MembershipRepository,
-	userRepository repository.UserRepository) UserMembershipService {
-	return &userMembershipService{userMembershipRepository: userMembershipRepository, membershipRepository: membershipRepository, userRepository: userRepository}
+	userRepository repository.UserRepository, entryHistoryRepository repository.EntryHistoryRepository) UserMembershipService {
+	return &userMembershipService{userMembershipRepository: userMembershipRepository, membershipRepository: membershipRepository, userRepository: userRepository, entryHistoryRepository: entryHistoryRepository}
 }
 
 func (s *userMembershipService) CreateUserMembership(ctx context.Context, req dto.CreateUserMembershipRequestDto) (dto.UserMembershipResponseDto, error) {
@@ -66,6 +67,18 @@ func (s *userMembershipService) SearchMembership(ctx context.Context, userId str
 
 	UserId, err := s.userMembershipRepository.SearchMember(ctx, nil, userId)
 	if err != nil {
+		return dto.UserResponseDto{}, err
+	}
+
+	parsedUserId, err := uuid.Parse(userId)
+	if err != nil {
+		return dto.UserResponseDto{}, err
+	}
+
+	if err := s.entryHistoryRepository.AddEntry(ctx, nil, models.EntryHistory{
+		UserId:    parsedUserId,
+		EntryTime: time.Now(),
+	}); err != nil {
 		return dto.UserResponseDto{}, err
 	}
 

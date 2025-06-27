@@ -5,6 +5,7 @@ import (
 	"go-kpl/internal/domain/models"
 	"go-kpl/internal/domain/repository"
 	valueobject "go-kpl/internal/domain/value_object"
+	"time"
 
 	"golang.org/x/net/context"
 )
@@ -72,15 +73,26 @@ func (s *userService) GetMeData(ctx context.Context, userId string) (dto.UserRes
 	if err != nil {
 		return dto.UserResponseDto{}, err
 	}
-	//TODO jangan lupa buat interface baru untuk ambil usermembership sekalian
+
+	var userMembershipId string
+	var expiredAt time.Time
+
+	if userData.UserMembership != nil {
+		userMembershipId = userData.UserMembership.Id.String()
+		expiredAt = userData.UserMembership.ExpiredAt
+	} else {
+		userMembershipId = ""
+	}
+
 	return dto.UserResponseDto{
 		Id:       userData.Id.String(),
 		Email:    userData.Email,
 		Role:     userData.Role.GetRole(),
 		Username: userData.Username,
 		UserMembership: dto.UserMembershipResponseDto{
-			Id:        userData.UserMembership.Id.String(),
-			ExpiredAt: userData.UserMembership.ExpiredAt,
+			Id:        userMembershipId,
+			ExpiredAt: expiredAt,
 		},
 	}, nil
+
 }

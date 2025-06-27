@@ -3,6 +3,7 @@ package repository
 import (
 	"go-kpl/internal/domain/models"
 
+	"github.com/google/uuid"
 	"golang.org/x/net/context"
 	"gorm.io/gorm"
 )
@@ -47,6 +48,10 @@ func (r *userRepository) GetById(ctx context.Context, tx *gorm.DB, userId string
 		Preload("UserMembership").
 		Take(&user, "id = ?", userId).Error; err != nil {
 		return models.User{}, err
+	}
+
+	if user.UserMembership != nil && user.UserMembership.Id == uuid.Nil {
+		user.UserMembership = nil
 	}
 
 	return user, nil

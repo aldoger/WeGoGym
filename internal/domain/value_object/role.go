@@ -30,8 +30,8 @@ func (r *UserRole) GetRole() string {
 	return r.value
 }
 
-func (r UserRole) Equals(other UserRole) bool {
-	return r.value == other.value
+func (r UserRole) IsAdmin(role string) bool {
+	return role == ADMIN_ROLE
 }
 
 func (r *UserRole) Scan(value interface{}) error {
