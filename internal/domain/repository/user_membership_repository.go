@@ -42,7 +42,7 @@ func (r *userMembershipRepository) SearchMember(ctx context.Context, tx *gorm.DB
 	}
 
 	var UserMembership models.UserMembership
-	if err := tx.WithContext(ctx).First(&UserMembership).Where("user_id = ?", userId).Error; err != nil {
+	if err := tx.WithContext(ctx).Where("user_id = ?", userId).First(&UserMembership).Error; err != nil {
 		return "", err
 	}
 
