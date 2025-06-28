@@ -7,6 +7,7 @@ import (
 	"go-kpl/internal/pkg/response"
 	"net/http"
 	"os"
+	"time"
 
 	qrcode "github.com/skip2/go-qrcode"
 
@@ -63,10 +64,10 @@ func (c *userController) Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("id", user.Id, MAX_AGE, "/", "", false, true)
-	ctx.SetCookie("email", user.Email, MAX_AGE, "/", "", false, true)
-	ctx.SetCookie("role", user.Role, MAX_AGE, "/", "", false, true)
-	ctx.SetCookie("username", user.Username, MAX_AGE, "/", "", false, true)
+	setCustomCookie(ctx, "id", user.Id, MAX_AGE)
+	setCustomCookie(ctx, "email", user.Email, MAX_AGE)
+	setCustomCookie(ctx, "role", user.Role, MAX_AGE)
+	setCustomCookie(ctx, "username", user.Username, MAX_AGE)
 
 	response.NewSuccess("login successfully", user).Send(ctx)
 }
@@ -102,4 +103,20 @@ func (c *userController) GenerateQrMe(ctx *gin.Context) {
 	}
 
 	ctx.Data(http.StatusOK, "image/png", pngQR)
+}
+
+func setCustomCookie(ctx *gin.Context, name, value string, maxAge int) {
+	cookie := http.Cookie{
+		Name:     name,
+		Value:    value,
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   maxAge,
+		Secure:   true, // wajib true untuk SameSite=None
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+		Expires:  time.Now().Add(time.Duration(maxAge) * time.Second),
+	}
+
+	http.SetCookie(ctx.Writer, &cookie)
 }
