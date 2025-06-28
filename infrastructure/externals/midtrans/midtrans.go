@@ -4,7 +4,6 @@ import (
 	"go-kpl/internal/domain/models"
 	"os"
 
-	"github.com/google/uuid"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
 )
@@ -19,9 +18,7 @@ func NewMidtrans() *MidtransClient {
 	return &MidtransClient{Client: NewClient}
 }
 
-func (m *MidtransClient) CreateMemberTransaction(email string, kode string, membershipDetail models.Membership) (*snap.Response, error) {
-
-	orderID := uuid.New().String()
+func (m *MidtransClient) CreateMemberTransaction(userId string, email string, kode string, membershipDetail models.Membership) (*snap.Response, error) {
 
 	var PriceInt = int64(membershipDetail.Price)
 
@@ -43,7 +40,7 @@ func (m *MidtransClient) CreateMemberTransaction(email string, kode string, memb
 
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  orderID,
+			OrderID:  userId,
 			GrossAmt: PriceInt,
 		},
 		CustomerDetail: &midtrans.CustomerDetails{

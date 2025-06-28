@@ -79,7 +79,7 @@ func (c *userController) GetMe(ctx *gin.Context) {
 		response.NewFailed("Id user not found", myerror.New("user id not provided", http.StatusBadRequest)).Send(ctx)
 		return
 	}
-	user, err := c.userService.GetMeData(ctx, userId)
+	user, err := c.userService.GetMeDataById(ctx, userId)
 	if err != nil {
 		response.NewFailed("failed to retrive user data", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
 	}

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"go-kpl/internal/application/dto"
 	"go-kpl/internal/application/services"
 	myerror "go-kpl/internal/pkg/errors"
@@ -18,15 +17,24 @@ type (
 	}
 
 	transactionController struct {
-		transactionService services.TransactionService
+		transactionService    services.TransactionService
+		userService           services.UserService
+		userMembershipService services.UserMembershipService
 	}
 )
 
-func NewTransactionController(transactionService services.TransactionService) TransactionController {
-	return &transactionController{transactionService: transactionService}
+func NewTransactionController(transactionService services.TransactionService, userMembershipService services.UserMembershipService,
+	userService services.UserService) TransactionController {
+	return &transactionController{transactionService: transactionService, userMembershipService: userMembershipService, userService: userService}
 }
 
 func (c *transactionController) CreateTransaction(ctx *gin.Context) {
+
+	userEmail, err := ctx.Cookie("email")
+	if err != nil {
+		response.NewFailed("failed to get data from cookie", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
+		return
+	}
 
 	var req dto.TransactionRequestDto
 
@@ -35,7 +43,7 @@ func (c *transactionController) CreateTransaction(ctx *gin.Context) {
 		return
 	}
 
-	transaction, err := c.transactionService.CreateTransaction(ctx, req)
+	transaction, err := c.transactionService.CreateTransaction(ctx, req, userEmail)
 	if err != nil {
 		response.NewFailed("Transaction failed to process", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
 		return
@@ -48,25 +56,27 @@ func (c *transactionController) TransactionNotification(ctx *gin.Context) {
 	var payload map[string]interface{}
 
 	if err := ctx.BindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid JSON: " + err.Error(),
-		})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON: " + err.Error()})
 		return
 	}
 
-	fmt.Println("Webhook diterima:")
-	for key, val := range payload {
-		fmt.Printf("%s: %v\n", key, val)
+	status, _ := payload["transaction_status"].(string)
+	if status != "settlement" {
+		ctx.JSON(http.StatusOK, gin.H{"status": "not processed"})
+		return
 	}
 
-	handleWebhook(payload)
-
-	ctx.JSON(http.StatusOK, gin.H{"status": "ok"})
-}
-
-func handleWebhook(data map[string]interface{}) {
-	// Contoh logika: ambil status transaksi
-	if status, ok := data["transaction_status"]; ok {
-		fmt.Println("Status Transaksi:", status)
+	orderId, ok := payload["order_id"].(string)
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "order_id missing"})
+		return
 	}
+
+	err := c.userMembershipService.UpdateMembership(ctx, orderId)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "update user membership failed"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "user membership is verified"})
 }

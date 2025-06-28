@@ -39,13 +39,13 @@ func NewGinServer() *RestServer {
 		userService           services.UserService           = services.NewUserService(userRepository)
 		membersipService      services.MembershipService     = services.NewMembershipService(membershipRepository)
 		userMembershipService services.UserMembershipService = services.NewUserMembershipService(userMembershipRepository, membershipRepository, userRepository, historyRepository)
-		transactionService    services.TransactionService    = services.NewTransactionService(midtransClient, membershipRepository)
+		transactionService    services.TransactionService    = services.NewTransactionService(midtransClient, membershipRepository, userMembershipRepository, userRepository)
 		historyService        services.EntryHistoryService   = services.NewEntryHistoryService(historyRepository, userRepository)
 
 		userController           controllers.UserController           = controllers.NewUserController(userService)
 		membershipController     controllers.MembershipController     = controllers.NewMembershipController(membersipService)
 		userMembershipController controllers.UserMembershipController = controllers.NewUserMembershipController(userMembershipService)
-		transactionController    controllers.TransactionController    = controllers.NewTransactionController(transactionService)
+		transactionController    controllers.TransactionController    = controllers.NewTransactionController(transactionService, userMembershipService, userService)
 		historyController        controllers.EntryHistoryController   = controllers.NewEntryHistoryController(historyService)
 	)
 

@@ -13,6 +13,7 @@ type (
 		Create(ctx context.Context, tx *gorm.DB, user models.User) (models.User, error)
 		GetById(ctx context.Context, tx *gorm.DB, userId string) (models.User, error)
 		GetByEmail(ctx context.Context, tx *gorm.DB, email string, password string) (models.User, error)
+		GetByEmailNoPassword(ctx context.Context, tx *gorm.DB, email string) (models.User, error)
 	}
 
 	userRepository struct {
@@ -65,6 +66,19 @@ func (r *userRepository) GetByEmail(ctx context.Context, tx *gorm.DB, email stri
 
 	var user models.User
 	if err := tx.WithContext(ctx).Take(&user, "email = ? AND password = ?", email, password).Error; err != nil {
+		return models.User{}, err
+	}
+
+	return user, nil
+}
+
+func (r *userRepository) GetByEmailNoPassword(ctx context.Context, tx *gorm.DB, email string) (models.User, error) {
+	if tx == nil {
+		tx = r.db
+	}
+
+	var user models.User
+	if err := tx.WithContext(ctx).Take(&user, "email = ?", email).Error; err != nil {
 		return models.User{}, err
 	}
 

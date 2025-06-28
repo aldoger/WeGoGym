@@ -14,7 +14,8 @@ type (
 	UserService interface {
 		Register(ctx context.Context, req dto.UserRegistrationDto) (dto.UserResponseDto, error)
 		Login(ctx context.Context, req dto.UserLoginDto) (dto.UserResponseDto, error)
-		GetMeData(ctx context.Context, userId string) (dto.UserResponseDto, error)
+		GetMeDataById(ctx context.Context, userId string) (dto.UserResponseDto, error)
+		GetMeDataByEmail(ctx context.Context, email string) (dto.UserResponseDto, error)
 	}
 
 	userService struct {
@@ -67,9 +68,39 @@ func (s *userService) Login(ctx context.Context, req dto.UserLoginDto) (dto.User
 	}, nil
 }
 
-func (s *userService) GetMeData(ctx context.Context, userId string) (dto.UserResponseDto, error) {
+func (s *userService) GetMeDataById(ctx context.Context, userId string) (dto.UserResponseDto, error) {
 
 	userData, err := s.userRepository.GetById(ctx, nil, userId)
+	if err != nil {
+		return dto.UserResponseDto{}, err
+	}
+
+	var userMembershipId string
+	var expiredAt time.Time
+
+	if userData.UserMembership != nil {
+		userMembershipId = userData.UserMembership.Id.String()
+		expiredAt = userData.UserMembership.ExpiredAt
+	} else {
+		userMembershipId = ""
+	}
+
+	return dto.UserResponseDto{
+		Id:       userData.Id.String(),
+		Email:    userData.Email,
+		Role:     userData.Role.GetRole(),
+		Username: userData.Username,
+		UserMembership: dto.UserMembershipResponseDto{
+			Id:        userMembershipId,
+			ExpiredAt: expiredAt,
+		},
+	}, nil
+
+}
+
+func (s *userService) GetMeDataByEmail(ctx context.Context, email string) (dto.UserResponseDto, error) {
+
+	userData, err := s.userRepository.GetByEmailNoPassword(ctx, nil, email)
 	if err != nil {
 		return dto.UserResponseDto{}, err
 	}
