@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"go-kpl/internal/application/dto"
 	"go-kpl/internal/application/services"
 	myerror "go-kpl/internal/pkg/errors"
@@ -13,6 +14,7 @@ import (
 type (
 	TransactionController interface {
 		CreateTransaction(ctx *gin.Context)
+		TransactionNotification(ctx *gin.Context)
 	}
 
 	transactionController struct {
@@ -40,4 +42,31 @@ func (c *transactionController) CreateTransaction(ctx *gin.Context) {
 	}
 
 	response.NewSuccess("Transation successfully process", transaction).Send(ctx)
+}
+
+func (c *transactionController) TransactionNotification(ctx *gin.Context) {
+	var payload map[string]interface{}
+
+	if err := ctx.BindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid JSON: " + err.Error(),
+		})
+		return
+	}
+
+	fmt.Println("Webhook diterima:")
+	for key, val := range payload {
+		fmt.Printf("%s: %v\n", key, val)
+	}
+
+	handleWebhook(payload)
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func handleWebhook(data map[string]interface{}) {
+	// Contoh logika: ambil status transaksi
+	if status, ok := data["transaction_status"]; ok {
+		fmt.Println("Status Transaksi:", status)
+	}
 }
