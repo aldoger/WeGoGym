@@ -28,18 +28,12 @@ func (c *transactionController) CreateTransaction(ctx *gin.Context) {
 
 	var req dto.TransactionRequestDto
 
-	UserEmail, err := ctx.Cookie("email")
-	if err != nil {
-		response.NewFailed("Id user not found in cookie", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
-		return
-	}
-
 	if err := ctx.ShouldBind(&req); err != nil {
 		response.NewFailed("failed get data from body", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
 		return
 	}
 
-	transaction, err := c.transactionService.CreateTransaction(ctx, req, UserEmail)
+	transaction, err := c.transactionService.CreateTransaction(ctx, req)
 	if err != nil {
 		response.NewFailed("Transaction failed to process", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
 		return
