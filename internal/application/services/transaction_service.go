@@ -10,7 +10,7 @@ import (
 
 type (
 	TransactionService interface {
-		CreateTransaction(ctx context.Context, req dto.TransactionRequestDto, email string) (dto.TransactionResponseDto, error)
+		CreateTransaction(ctx context.Context, req dto.TransactionRequestDto) (dto.TransactionResponseDto, error)
 	}
 
 	transactionService struct {
@@ -23,14 +23,14 @@ func NewTransactionService(midtrans *midtrans.MidtransClient, membershipReposito
 	return &transactionService{midtrans: midtrans, membershipRepository: membershipRepository}
 }
 
-func (m *transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequestDto, email string) (dto.TransactionResponseDto, error) {
+func (m *transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequestDto) (dto.TransactionResponseDto, error) {
 
 	membershipDetail, err := m.membershipRepository.GetById(ctx, nil, req.MembershipId)
 	if err != nil {
 		return dto.TransactionResponseDto{}, err
 	}
 
-	transaction, err := m.midtrans.CreateTransaction(email, req.Kode, membershipDetail)
+	transaction, err := m.midtrans.CreateMemberTransaction(req.Email, req.Kode, membershipDetail)
 	if err != nil {
 		return dto.TransactionResponseDto{}, err
 	}

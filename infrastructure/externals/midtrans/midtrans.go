@@ -19,7 +19,7 @@ func NewMidtrans() *MidtransClient {
 	return &MidtransClient{Client: NewClient}
 }
 
-func (m *MidtransClient) CreateTransaction(email string, kode string, membershipDetail models.Membership) (*snap.Response, error) {
+func (m *MidtransClient) CreateMemberTransaction(email string, kode string, membershipDetail models.Membership) (*snap.Response, error) {
 
 	orderID := uuid.New().String()
 
