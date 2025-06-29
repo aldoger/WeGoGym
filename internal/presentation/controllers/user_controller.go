@@ -95,7 +95,7 @@ func (c *userController) GenerateQrMe(ctx *gin.Context) {
 		return
 	}
 
-	endpoint := os.Getenv("BASE_URL") + "/api/user-membership/search-membership/" + UserId
+	endpoint := os.Getenv("FE_URL") + UserId
 
 	pngQR, err := qrcode.Encode(endpoint, qrcode.Medium, 256)
 	if err != nil {
