@@ -13,5 +13,6 @@ func User(server *gin.Engine, controller controllers.UserController) {
 		routes.POST("/login", controller.Login)
 		routes.GET("/me/:id", controller.GetMe)
 		routes.GET("/generate-qr", controller.GenerateQrMe)
+		routes.POST("/logout", controller.Logout)
 	}
 }

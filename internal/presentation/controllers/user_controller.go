@@ -20,6 +20,7 @@ type (
 		Login(ctx *gin.Context)
 		GetMe(ctx *gin.Context)
 		GenerateQrMe(ctx *gin.Context)
+		Logout(ctx *gin.Context)
 	}
 
 	userController struct {
@@ -103,6 +104,15 @@ func (c *userController) GenerateQrMe(ctx *gin.Context) {
 	}
 
 	ctx.Data(http.StatusOK, "image/png", pngQR)
+}
+
+func (c *userController) Logout(ctx *gin.Context) {
+	ctx.SetCookie("id", "", -1, "/", "", false, true)
+	ctx.SetCookie("email", "", -1, "/", "", false, true)
+	ctx.SetCookie("role", "", -1, "/", "", false, true)
+	ctx.SetCookie("username", "", -1, "/", "", false, true)
+
+	response.NewSuccess("logout successfully", nil).Send(ctx)
 }
 
 func setCustomCookie(ctx *gin.Context, name, value string, maxAge int) {
