@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type UserMembership struct {
@@ -16,7 +15,6 @@ type UserMembership struct {
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeleteAt  gorm.DeletedAt
 }
 
 func (UserMembership) Tablename() string {
