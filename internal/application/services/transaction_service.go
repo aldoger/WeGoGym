@@ -3,9 +3,7 @@ package services
 import (
 	"go-kpl/infrastructure/externals/midtrans"
 	"go-kpl/internal/application/dto"
-	"go-kpl/internal/domain/models"
 	"go-kpl/internal/domain/repository"
-	"time"
 
 	"golang.org/x/net/context"
 )
@@ -16,16 +14,15 @@ type (
 	}
 
 	transactionService struct {
-		midtrans                 *midtrans.MidtransClient
-		membershipRepository     repository.MembershipRepository
-		userMembershipRepository repository.UserMembershipRepository
-		userRepository           repository.UserRepository
+		midtrans             *midtrans.MidtransClient
+		membershipRepository repository.MembershipRepository
+		userRepository       repository.UserRepository
 	}
 )
 
 func NewTransactionService(midtrans *midtrans.MidtransClient, membershipRepository repository.MembershipRepository, userMembershipRepository repository.UserMembershipRepository,
 	userRepository repository.UserRepository) TransactionService {
-	return &transactionService{midtrans: midtrans, membershipRepository: membershipRepository, userMembershipRepository: userMembershipRepository, userRepository: userRepository}
+	return &transactionService{midtrans: midtrans, membershipRepository: membershipRepository, userRepository: userRepository}
 }
 
 func (m *transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequestDto, email string) (dto.TransactionResponseDto, error) {
@@ -36,17 +33,6 @@ func (m *transactionService) CreateTransaction(ctx context.Context, req dto.Tran
 	}
 
 	userData, err := m.userRepository.GetByEmailNoPassword(ctx, nil, email)
-	if err != nil {
-		return dto.TransactionResponseDto{}, err
-	}
-
-	userMembership := models.UserMembership{
-		UserId:    userData.Id,
-		MemberId:  membershipDetail.Id,
-		ExpiredAt: time.Now().Add(time.Hour * 24 * time.Duration(membershipDetail.Duration)),
-	}
-
-	_, err = m.userMembershipRepository.Create(ctx, nil, userMembership)
 	if err != nil {
 		return dto.TransactionResponseDto{}, err
 	}

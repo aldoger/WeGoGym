@@ -14,7 +14,6 @@ type (
 	UserMembershipService interface {
 		CreateUserMembership(ctx context.Context, req dto.CreateUserMembershipRequestDto) (dto.UserMembershipResponseDto, error)
 		SearchMembership(ctx context.Context, userId string) (dto.UserResponseDto, error)
-		UpdateMembership(ctx context.Context, userId string) error
 	}
 
 	userMembershipService struct {
@@ -98,13 +97,4 @@ func (s *userMembershipService) SearchMembership(ctx context.Context, userId str
 			ExpiredAt: User.UserMembership.ExpiredAt,
 		},
 	}, nil
-}
-
-func (s *userMembershipService) UpdateMembership(ctx context.Context, userId string) error {
-	_, err := s.userMembershipRepository.UpdateMember(ctx, nil, userId)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
