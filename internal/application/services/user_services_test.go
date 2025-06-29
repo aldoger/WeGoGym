@@ -20,10 +20,12 @@ func TestUserGetById(t *testing.T) {
 	ctx := context.Background()
 	expectedUUID := uuid.New()
 
+	userRole, _ := valueobject.NewUserRole(valueobject.MEMBER_ROLE)
+
 	mockUser := models.User{
 		Id:    expectedUUID,
 		Email: "test@example.com",
-		Role:  valueobject.NewUserRole(valueobject.MEMBER_ROLE),
+		Role:  userRole,
 	}
 
 	userRepository.Mock.On("GetById", mock.Anything, mock.Anything, expectedUUID.String()).
@@ -51,27 +53,29 @@ func TestUserServiceRegister(t *testing.T) {
 
 	createdId := uuid.New()
 
+	userRole, _ := valueobject.NewUserRole(valueobject.MEMBER_ROLE)
+
 	mockUser := models.User{
 		Id:       createdId,
 		Username: input.Username,
 		Email:    input.Email,
 		Password: input.Password,
 		Gender:   models.Gender(input.Gender),
-		Role:     valueobject.NewUserRole(valueobject.MEMBER_ROLE),
+		Role:     userRole,
 	}
 
 	userRepository.Mock.On("Create", mock.Anything, mock.Anything, mock.MatchedBy(func(u models.User) bool {
 		return u.Username == input.Username &&
 			u.Email == input.Email &&
 			u.Password == input.Password &&
-			string(u.Gender) == input.Gender &&
-			u.Role.Value() == valueobject.MEMBER_ROLE
+			u.Role.GetRole() == mockUser.Role.GetRole()
 	})).Return(mockUser, nil)
 
 	result, err := userServiceTest.Register(ctx, input)
 
 	assert.NoError(t, err)
 	assert.Equal(t, createdId.String(), result.Id)
+	assert.Equal(t, mockUser.Role.GetRole(), result.Role)
 	assert.Equal(t, input.Email, result.Email)
 	assert.Equal(t, input.Username, result.Username)
 

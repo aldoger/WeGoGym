@@ -29,7 +29,10 @@ func NewUserService(userRepository repository.UserRepository) UserService {
 
 func (s *userService) Register(ctx context.Context, req dto.UserRegistrationDto) (dto.UserResponseDto, error) {
 
-	role := valueobject.NewUserRole(valueobject.MEMBER_ROLE)
+	role, err := valueobject.NewUserRole(valueobject.MEMBER_ROLE)
+	if err != nil {
+		return dto.UserResponseDto{}, err
+	}
 
 	createUser, err := s.userRepository.Create(ctx, nil, models.User{
 		Username: req.Username,
@@ -47,6 +50,7 @@ func (s *userService) Register(ctx context.Context, req dto.UserRegistrationDto)
 		Id:       createUser.Id.String(),
 		Email:    createUser.Email,
 		Username: createUser.Username,
+		Role:     createUser.Role.GetRole(),
 	}, nil
 }
 

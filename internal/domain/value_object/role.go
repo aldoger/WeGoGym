@@ -2,6 +2,7 @@ package valueobject
 
 import (
 	"database/sql/driver"
+	"errors"
 	"fmt"
 )
 
@@ -14,15 +15,15 @@ const (
 	ADMIN_ROLE  = "admin"
 )
 
-func NewUserRole(value string) UserRole {
+func NewUserRole(value string) (UserRole, error) {
 	if value != MEMBER_ROLE && value != ADMIN_ROLE {
-		return UserRole{}
+		return UserRole{}, errors.New("invalid user role")
 	}
-	return UserRole{value: value}
+	return UserRole{value: value}, nil
 }
 
-func (r UserRole) Value() driver.Value {
-	return r.value
+func (r UserRole) Value() (driver.Value, error) {
+	return r.value, nil
 }
 
 func (r *UserRole) GetRole() string {
@@ -38,7 +39,10 @@ func (r *UserRole) Scan(value interface{}) error {
 	if !ok {
 		return fmt.Errorf("expected string for UserRole but got %T", value)
 	}
-	role := NewUserRole(strVal)
+	role, err := NewUserRole(strVal)
+	if err != nil {
+		return err
+	}
 	*r = role
 	return nil
 }
