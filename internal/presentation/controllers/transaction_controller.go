@@ -13,19 +13,15 @@ import (
 type (
 	TransactionController interface {
 		CreateTransaction(ctx *gin.Context)
-		TransactionNotification(ctx *gin.Context)
 	}
 
 	transactionController struct {
-		transactionService    services.TransactionService
-		userService           services.UserService
-		userMembershipService services.UserMembershipService
+		transactionService services.TransactionService
 	}
 )
 
-func NewTransactionController(transactionService services.TransactionService, userMembershipService services.UserMembershipService,
-	userService services.UserService) TransactionController {
-	return &transactionController{transactionService: transactionService, userMembershipService: userMembershipService, userService: userService}
+func NewTransactionController(transactionService services.TransactionService) TransactionController {
+	return &transactionController{transactionService: transactionService}
 }
 
 func (c *transactionController) CreateTransaction(ctx *gin.Context) {
@@ -50,33 +46,4 @@ func (c *transactionController) CreateTransaction(ctx *gin.Context) {
 	}
 
 	response.NewSuccess("Transation successfully process", transaction).Send(ctx)
-}
-
-func (c *transactionController) TransactionNotification(ctx *gin.Context) {
-	var payload map[string]interface{}
-
-	if err := ctx.BindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON: " + err.Error()})
-		return
-	}
-
-	status, _ := payload["transaction_status"].(string)
-	if status != "settlement" {
-		ctx.JSON(http.StatusOK, gin.H{"status": "not processed"})
-		return
-	}
-
-	orderId, ok := payload["order_id"].(string)
-	if !ok {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "order_id missing"})
-		return
-	}
-
-	err := c.userMembershipService.UpdateMembership(ctx, orderId)
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "update user membership failed"})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"status": "user membership is verified"})
 }

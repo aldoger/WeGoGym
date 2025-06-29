@@ -14,6 +14,7 @@ type (
 	UserMembershipController interface {
 		CreateUserMembership(ctx *gin.Context)
 		SearchMembership(ctx *gin.Context)
+		UpdateMembership(ctx *gin.Context)
 	}
 
 	userMembershipController struct {
@@ -56,4 +57,21 @@ func (c *userMembershipController) SearchMembership(ctx *gin.Context) {
 	}
 
 	response.NewSuccess("user is a member of the gym", User).Send(ctx)
+}
+
+func (c *userMembershipController) UpdateMembership(ctx *gin.Context) {
+
+	var req dto.UpdateUserMembershipRequestDto
+	if err := ctx.ShouldBind(&req); err != nil {
+		response.NewFailed("failed get data from body", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
+		return
+	}
+
+	err := c.userMembershipService.UpdateMembership(ctx, req.UserId)
+	if err != nil {
+		response.NewFailed("failed to update user membership", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
+		return
+	}
+
+	response.NewSuccess("user membership is verified", gin.H{"message": "user membership is verified"}).Send(ctx)
 }

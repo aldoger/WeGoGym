@@ -7,6 +7,10 @@ type CreateUserMembershipRequestDto struct {
 	MembershipId string `json:"membership_id" binding:"required"`
 }
 
+type UpdateUserMembershipRequestDto struct {
+	UserId string `json:"user_id" binding:"required"`
+}
+
 type UserMembershipResponseDto struct {
 	Id        string    `json:"id"`
 	ExpiredAt time.Time `json:"expired"`

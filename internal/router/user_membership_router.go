@@ -12,5 +12,6 @@ func UserMembership(server *gin.Engine, controller controllers.UserMembershipCon
 	{
 		routes.POST("/new-membership", middleware.Authenticate(), controller.CreateUserMembership)
 		routes.GET("/search-membership/:id", middleware.OnlyAllow(), controller.SearchMembership)
+		routes.POST("/update-membership", controller.UpdateMembership)
 	}
 }

@@ -10,6 +10,5 @@ func Transaction(server *gin.Engine, controller controllers.TransactionControlle
 	routes := server.Group("/api/transaction")
 	{
 		routes.POST("/", controller.CreateTransaction)
-		routes.POST("/notify", controller.TransactionNotification)
 	}
 }
