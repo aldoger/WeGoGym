@@ -56,3 +56,7 @@ func (m *MidtransClient) CreateMemberTransaction(userId string, email string, ko
 
 	return snapResp, nil
 }
+
+func (m *MidtransClient) CreatePersonalTrainerTransaction(userId string, email string, kode string, personalTrainerDetail models.UserPersonalTrainer) (*snap.Response, error) {
+
+}
