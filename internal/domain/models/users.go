@@ -24,10 +24,15 @@ type User struct {
 	Gender         Gender               `json:"gender"`
 	Role           valueobject.UserRole `json:"role"`
 	UserMembership *UserMembership      `json:"user_membership_id" gorm:"foreignKey:UserId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	UserPT         *UserPersonalTrainer `json:"user_pt_id" gorm:"foreignKey:UserId;references:Id;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeleteAt  gorm.DeletedAt
+}
+
+func (user *User) IsMember() bool {
+	return user.UserMembership.Verified
 }
 
 func (User) TableName() string {

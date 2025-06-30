@@ -12,7 +12,7 @@ import (
 
 type (
 	TransactionController interface {
-		CreateTransaction(ctx *gin.Context)
+		CreateMemberTransaction(ctx *gin.Context)
 	}
 
 	transactionController struct {
@@ -24,7 +24,7 @@ func NewTransactionController(transactionService services.TransactionService) Tr
 	return &transactionController{transactionService: transactionService}
 }
 
-func (c *transactionController) CreateTransaction(ctx *gin.Context) {
+func (c *transactionController) CreateMemberTransaction(ctx *gin.Context) {
 
 	userEmail, err := ctx.Cookie("email")
 	if err != nil {
@@ -39,7 +39,7 @@ func (c *transactionController) CreateTransaction(ctx *gin.Context) {
 		return
 	}
 
-	transaction, err := c.transactionService.CreateTransaction(ctx, req, userEmail)
+	transaction, err := c.transactionService.CreateMemberTransaction(ctx, req, userEmail)
 	if err != nil {
 		response.NewFailed("Transaction failed to process", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
 		return

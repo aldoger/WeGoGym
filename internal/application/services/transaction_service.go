@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"go-kpl/infrastructure/externals/midtrans"
 	"go-kpl/internal/application/dto"
 	"go-kpl/internal/domain/repository"
@@ -10,7 +11,7 @@ import (
 
 type (
 	TransactionService interface {
-		CreateTransaction(ctx context.Context, req dto.TransactionRequestDto, email string) (dto.TransactionResponseDto, error)
+		CreateMemberTransaction(ctx context.Context, req dto.TransactionRequestDto, email string) (dto.TransactionResponseDto, error)
 	}
 
 	transactionService struct {
@@ -25,7 +26,7 @@ func NewTransactionService(midtrans *midtrans.MidtransClient, membershipReposito
 	return &transactionService{midtrans: midtrans, membershipRepository: membershipRepository, userRepository: userRepository}
 }
 
-func (m *transactionService) CreateTransaction(ctx context.Context, req dto.TransactionRequestDto, email string) (dto.TransactionResponseDto, error) {
+func (m *transactionService) CreateMemberTransaction(ctx context.Context, req dto.TransactionRequestDto, email string) (dto.TransactionResponseDto, error) {
 
 	membershipDetail, err := m.membershipRepository.GetById(ctx, nil, req.MembershipId)
 	if err != nil {
@@ -35,6 +36,10 @@ func (m *transactionService) CreateTransaction(ctx context.Context, req dto.Tran
 	userData, err := m.userRepository.GetByEmailNoPassword(ctx, nil, email)
 	if err != nil {
 		return dto.TransactionResponseDto{}, err
+	}
+
+	if userData.IsMember() {
+		return dto.TransactionResponseDto{}, errors.New("user already a member")
 	}
 
 	transaction, err := m.midtrans.CreateMemberTransaction(userData.Id.String(), email, req.Kode, membershipDetail)
