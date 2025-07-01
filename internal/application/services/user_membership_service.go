@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"go-kpl/internal/application/dto"
 	"go-kpl/internal/domain/models"
 	"go-kpl/internal/domain/repository"
@@ -12,8 +13,8 @@ import (
 
 type (
 	UserMembershipService interface {
-		CreateUserMembership(ctx context.Context, req dto.CreateUserMembershipRequestDto) (dto.UserMembershipResponseDto, error)
-		SearchMembership(ctx context.Context, userId string) (dto.UserResponseDto, error)
+		CreateUserMembership(ctx context.Context, req dto.CreateUserMembershipRequestDto, userId string) (dto.UserMembershipResponseDto, error)
+		SearchMembership(ctx context.Context, userId string) (dto.UserSearchMembershipResponse, error)
 	}
 
 	userMembershipService struct {
@@ -21,24 +22,30 @@ type (
 		membershipRepository     repository.MembershipRepository
 		userRepository           repository.UserRepository
 		entryHistoryRepository   repository.EntryHistoryRepository
+		userPTRepository         repository.UserPersonalTrainerRepository
 	}
 )
 
 func NewUserMembershipService(userMembershipRepository repository.UserMembershipRepository, membershipRepository repository.MembershipRepository,
-	userRepository repository.UserRepository, entryHistoryRepository repository.EntryHistoryRepository) UserMembershipService {
-	return &userMembershipService{userMembershipRepository: userMembershipRepository, membershipRepository: membershipRepository, userRepository: userRepository, entryHistoryRepository: entryHistoryRepository}
+	userRepository repository.UserRepository, entryHistoryRepository repository.EntryHistoryRepository, userPTRepository repository.UserPersonalTrainerRepository) UserMembershipService {
+	return &userMembershipService{userMembershipRepository: userMembershipRepository, membershipRepository: membershipRepository, userRepository: userRepository, entryHistoryRepository: entryHistoryRepository,
+		userPTRepository: userPTRepository}
 }
 
-func (s *userMembershipService) CreateUserMembership(ctx context.Context, req dto.CreateUserMembershipRequestDto) (dto.UserMembershipResponseDto, error) {
+func (s *userMembershipService) CreateUserMembership(ctx context.Context, req dto.CreateUserMembershipRequestDto, userId string) (dto.UserMembershipResponseDto, error) {
 
 	membershipDetail, err := s.membershipRepository.GetById(ctx, nil, req.MembershipId)
 	if err != nil {
 		return dto.UserMembershipResponseDto{}, err
 	}
 
-	userUUID, err := uuid.Parse(req.UserId)
+	userData, err := s.userRepository.GetById(ctx, nil, userId)
 	if err != nil {
 		return dto.UserMembershipResponseDto{}, err
+	}
+
+	if userData.IsMember() {
+		return dto.UserMembershipResponseDto{}, errors.New("user already a member")
 	}
 
 	memberUUID, err := uuid.Parse(req.MembershipId)
@@ -47,7 +54,7 @@ func (s *userMembershipService) CreateUserMembership(ctx context.Context, req dt
 	}
 
 	userMembership := models.UserMembership{
-		UserId:    userUUID,
+		UserId:    userData.Id,
 		MemberId:  memberUUID,
 		ExpiredAt: time.Now().Add(time.Hour * 24 * time.Duration(membershipDetail.Duration)),
 	}
@@ -63,31 +70,36 @@ func (s *userMembershipService) CreateUserMembership(ctx context.Context, req dt
 	}, nil
 }
 
-func (s *userMembershipService) SearchMembership(ctx context.Context, userId string) (dto.UserResponseDto, error) {
+func (s *userMembershipService) SearchMembership(ctx context.Context, userId string) (dto.UserSearchMembershipResponse, error) {
 
 	UserId, err := s.userMembershipRepository.SearchMember(ctx, nil, userId)
 	if err != nil {
-		return dto.UserResponseDto{}, err
+		return dto.UserSearchMembershipResponse{}, err
 	}
 
 	parsedUserId, err := uuid.Parse(userId)
 	if err != nil {
-		return dto.UserResponseDto{}, err
+		return dto.UserSearchMembershipResponse{}, err
+	}
+
+	userPT, err := s.userPTRepository.UseSession(ctx, nil, parsedUserId)
+	if err != nil {
+		return dto.UserSearchMembershipResponse{}, err
 	}
 
 	if err := s.entryHistoryRepository.AddEntry(ctx, nil, models.EntryHistory{
 		UserId:    parsedUserId,
 		EntryTime: time.Now(),
 	}); err != nil {
-		return dto.UserResponseDto{}, err
+		return dto.UserSearchMembershipResponse{}, err
 	}
 
 	User, err := s.userRepository.GetById(ctx, nil, UserId)
 	if err != nil {
-		return dto.UserResponseDto{}, err
+		return dto.UserSearchMembershipResponse{}, err
 	}
 
-	return dto.UserResponseDto{
+	return dto.UserSearchMembershipResponse{
 		Id:       User.Id.String(),
 		Username: User.Username,
 		Email:    User.Email,
@@ -96,5 +108,6 @@ func (s *userMembershipService) SearchMembership(ctx context.Context, userId str
 			Id:        User.UserMembership.Id.String(),
 			ExpiredAt: User.UserMembership.ExpiredAt,
 		},
+		Sesi: userPT,
 	}, nil
 }

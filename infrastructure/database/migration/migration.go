@@ -22,6 +22,7 @@ func Migrate(db *gorm.DB) error {
 		&models.Membership{},
 		&models.UserMembership{},
 		&models.EntryHistory{},
+		&models.UserPersonalTrainer{},
 	); err != nil {
 		return err
 	}

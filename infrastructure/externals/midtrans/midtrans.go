@@ -3,7 +3,9 @@ package midtrans
 import (
 	"go-kpl/internal/domain/models"
 	"os"
+	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
 )
@@ -18,9 +20,11 @@ func NewMidtrans() *MidtransClient {
 	return &MidtransClient{Client: NewClient}
 }
 
-func (m *MidtransClient) CreateMemberTransaction(userId string, email string, kode string, membershipDetail models.Membership) (*snap.Response, error) {
+func (m *MidtransClient) CreateMemberTransaction(email string, kode string, membershipDetail models.Membership) (*snap.Response, error) {
 
 	var PriceInt = int64(membershipDetail.Price)
+
+	randomId := uuid.New().String()
 
 	var KODE_REFERAL = os.Getenv("KODE_REFERAL")
 
@@ -40,8 +44,44 @@ func (m *MidtransClient) CreateMemberTransaction(userId string, email string, ko
 
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  userId,
+			OrderID:  randomId,
 			GrossAmt: PriceInt,
+		},
+		CustomerDetail: &midtrans.CustomerDetails{
+			Email: email,
+		},
+		Items: &items,
+	}
+
+	snapResp, err := m.Client.CreateTransaction(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return snapResp, nil
+}
+
+func (m *MidtransClient) CreatePersonalTrainerTransaction(email string, harga int, sesi int) (*snap.Response, error) {
+
+	itemId := uuid.New()
+
+	randomId := uuid.New().String()
+
+	itemName := "Personal trainer " + strconv.Itoa(sesi) + " sesi"
+
+	items := []midtrans.ItemDetails{
+		{
+			ID:    itemId.String(),
+			Name:  itemName,
+			Price: int64(harga),
+			Qty:   1,
+		},
+	}
+
+	req := &snap.Request{
+		TransactionDetails: midtrans.TransactionDetails{
+			OrderID:  randomId,
+			GrossAmt: int64(harga),
 		},
 		CustomerDetail: &midtrans.CustomerDetails{
 			Email: email,

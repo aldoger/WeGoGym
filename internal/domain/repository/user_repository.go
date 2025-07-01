@@ -78,8 +78,12 @@ func (r *userRepository) GetByEmailNoPassword(ctx context.Context, tx *gorm.DB, 
 	}
 
 	var user models.User
-	if err := tx.WithContext(ctx).Take(&user, "email = ?", email).Error; err != nil {
+	if err := tx.WithContext(ctx).Preload("UserMembership").Take(&user, "email = ?", email).Error; err != nil {
 		return models.User{}, err
+	}
+
+	if user.UserMembership != nil && user.UserMembership.Id == uuid.Nil {
+		user.UserMembership = nil
 	}
 
 	return user, nil
