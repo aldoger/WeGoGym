@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"go-kpl/internal/application/dto"
 	"go-kpl/internal/domain/models"
 	"go-kpl/internal/domain/repository"
@@ -36,9 +37,13 @@ func (s *userMembershipService) CreateUserMembership(ctx context.Context, req dt
 		return dto.UserMembershipResponseDto{}, err
 	}
 
-	userUUID, err := uuid.Parse(req.UserId)
+	userData, err := s.userRepository.GetById(ctx, nil, req.UserId)
 	if err != nil {
 		return dto.UserMembershipResponseDto{}, err
+	}
+
+	if userData.IsMember() {
+		return dto.UserMembershipResponseDto{}, errors.New("user already a member")
 	}
 
 	memberUUID, err := uuid.Parse(req.MembershipId)
@@ -47,7 +52,7 @@ func (s *userMembershipService) CreateUserMembership(ctx context.Context, req dt
 	}
 
 	userMembership := models.UserMembership{
-		UserId:    userUUID,
+		UserId:    userData.Id,
 		MemberId:  memberUUID,
 		ExpiredAt: time.Now().Add(time.Hour * 24 * time.Duration(membershipDetail.Duration)),
 	}

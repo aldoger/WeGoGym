@@ -17,6 +17,6 @@ type UserMembership struct {
 	UpdatedAt time.Time
 }
 
-func (UserMembership) TableName() string {
-	return "UserMembership"
+func (UserMembership) Tablename() string {
+	return "User Membership"
 }
