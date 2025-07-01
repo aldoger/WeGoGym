@@ -8,6 +8,10 @@ type UserPersonalTrainer struct {
 	UserId uuid.UUID `json:"user_id" gorm:"uniqueIndex"`
 }
 
+func (userPT *UserPersonalTrainer) UsedSession() {
+	userPT.Sesi--
+}
+
 func (UserPersonalTrainer) TableName() string {
 	return "UserPersonalTrainer"
 }

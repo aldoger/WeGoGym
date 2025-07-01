@@ -26,13 +26,20 @@ func NewUserMembershipController(userMembershipService services.UserMembershipSe
 }
 
 func (c *userMembershipController) CreateUserMembership(ctx *gin.Context) {
+
+	userId, err := ctx.Cookie("id")
+	if err != nil {
+		response.NewFailed("user id is not found", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
+		return
+	}
+
 	var req dto.CreateUserMembershipRequestDto
 	if err := ctx.ShouldBind(&req); err != nil {
 		response.NewFailed("failed get data from body", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
 		return
 	}
 
-	userMembership, err := c.userMembershipService.CreateUserMembership(ctx, req)
+	userMembership, err := c.userMembershipService.CreateUserMembership(ctx, req, userId)
 	if err != nil {
 		response.NewFailed("failed to create user membership", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
 		return

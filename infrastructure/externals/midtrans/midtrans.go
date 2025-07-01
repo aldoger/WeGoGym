@@ -20,9 +20,11 @@ func NewMidtrans() *MidtransClient {
 	return &MidtransClient{Client: NewClient}
 }
 
-func (m *MidtransClient) CreateMemberTransaction(userId string, email string, kode string, membershipDetail models.Membership) (*snap.Response, error) {
+func (m *MidtransClient) CreateMemberTransaction(email string, kode string, membershipDetail models.Membership) (*snap.Response, error) {
 
 	var PriceInt = int64(membershipDetail.Price)
+
+	randomId := uuid.New().String()
 
 	var KODE_REFERAL = os.Getenv("KODE_REFERAL")
 
@@ -42,7 +44,7 @@ func (m *MidtransClient) CreateMemberTransaction(userId string, email string, ko
 
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  userId,
+			OrderID:  randomId,
 			GrossAmt: PriceInt,
 		},
 		CustomerDetail: &midtrans.CustomerDetails{
@@ -59,9 +61,11 @@ func (m *MidtransClient) CreateMemberTransaction(userId string, email string, ko
 	return snapResp, nil
 }
 
-func (m *MidtransClient) CreatePersonalTrainerTransaction(userId string, email string, harga int, sesi int) (*snap.Response, error) {
+func (m *MidtransClient) CreatePersonalTrainerTransaction(email string, harga int, sesi int) (*snap.Response, error) {
 
 	itemId := uuid.New()
+
+	randomId := uuid.New().String()
 
 	itemName := "Personal trainer " + strconv.Itoa(sesi) + " sesi"
 
@@ -76,7 +80,7 @@ func (m *MidtransClient) CreatePersonalTrainerTransaction(userId string, email s
 
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  userId,
+			OrderID:  randomId,
 			GrossAmt: int64(harga),
 		},
 		CustomerDetail: &midtrans.CustomerDetails{

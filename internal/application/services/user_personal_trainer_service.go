@@ -11,7 +11,7 @@ import (
 
 type (
 	UserPersonalTrainerService interface {
-		CreateUserPersonalTrainer(ctx context.Context, req dto.CreateUserPersonalTrainerDto) (dto.UserPersonalTrainerResponse, error)
+		CreateUserPersonalTrainer(ctx context.Context, req dto.CreateUserPersonalTrainerDto, userId string) (dto.UserPersonalTrainerResponse, error)
 	}
 
 	userPersonalTrainerService struct {
@@ -24,9 +24,9 @@ func NewUserPersonalTrainerService(userPersonalRepository repository.UserPersona
 	return &userPersonalTrainerService{userPersonalTrainerRepository: userPersonalRepository, userRepository: userRepository}
 }
 
-func (s *userPersonalTrainerService) CreateUserPersonalTrainer(ctx context.Context, req dto.CreateUserPersonalTrainerDto) (dto.UserPersonalTrainerResponse, error) {
+func (s *userPersonalTrainerService) CreateUserPersonalTrainer(ctx context.Context, req dto.CreateUserPersonalTrainerDto, userId string) (dto.UserPersonalTrainerResponse, error) {
 
-	userData, err := s.userRepository.GetById(ctx, nil, req.UserId)
+	userData, err := s.userRepository.GetById(ctx, nil, userId)
 	if err != nil {
 		return dto.UserPersonalTrainerResponse{}, err
 	}

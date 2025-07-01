@@ -55,9 +55,8 @@ func TestUserMembershipService_CreateUserMembership(t *testing.T) {
 	})).Return(mockUserMembership, nil)
 
 	result, err := userMembershipServiceTest.CreateUserMembership(ctx, dto.CreateUserMembershipRequestDto{
-		UserId:       userId.String(),
 		MembershipId: membershipId.String(),
-	})
+	}, userId.String())
 
 	// Assert
 	assert.NoError(t, err)

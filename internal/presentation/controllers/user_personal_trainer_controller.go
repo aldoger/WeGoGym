@@ -26,13 +26,19 @@ func NewUserPersonalTrainerController(userPersonalTrainerService services.UserPe
 
 func (c *userPersonalTrainerController) CreateUserPersonalTrainer(ctx *gin.Context) {
 
+	userId, err := ctx.Cookie("id")
+	if err != nil {
+		response.NewFailed("user id is not found", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
+		return
+	}
+
 	var req dto.CreateUserPersonalTrainerDto
 	if err := ctx.ShouldBind(&req); err != nil {
 		response.NewFailed("failed get data from body", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
 		return
 	}
 
-	userPT, err := c.userPersonalService.CreateUserPersonalTrainer(ctx, req)
+	userPT, err := c.userPersonalService.CreateUserPersonalTrainer(ctx, req, userId)
 	if err != nil {
 		response.NewFailed("failed to make user personal trainer", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
 		return

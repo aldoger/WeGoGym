@@ -3,7 +3,6 @@ package dto
 import "time"
 
 type CreateUserMembershipRequestDto struct {
-	UserId       string `json:"user_id" binding:"required"`
 	MembershipId string `json:"membership_id" binding:"required"`
 }
 
@@ -14,4 +13,13 @@ type UpdateUserMembershipRequestDto struct {
 type UserMembershipResponseDto struct {
 	Id        string    `json:"id"`
 	ExpiredAt time.Time `json:"expired"`
+}
+
+type UserSearchMembershipResponse struct {
+	Id             string                    `json:"id"`
+	Username       string                    `json:"username"`
+	Email          string                    `json:"email"`
+	Role           string                    `json:"role,omitempty"`
+	UserMembership UserMembershipResponseDto `json:"user_membership,omitempty"`
+	Sesi           int                       `json:"sesi"`
 }

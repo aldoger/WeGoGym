@@ -43,7 +43,7 @@ func (m *transactionService) CreateMemberTransaction(ctx context.Context, req dt
 		return dto.TransactionResponseDto{}, errors.New("user already a member")
 	}
 
-	transaction, err := m.midtrans.CreateMemberTransaction(userData.Id.String(), email, req.Kode, membershipDetail)
+	transaction, err := m.midtrans.CreateMemberTransaction(email, req.Kode, membershipDetail)
 	if err != nil {
 		return dto.TransactionResponseDto{}, err
 	}
@@ -65,7 +65,7 @@ func (m *transactionService) CreatePersonalTrainerTransaction(ctx context.Contex
 		return dto.TransactionResponseDto{}, errors.New("user is not a member")
 	}
 
-	transaction, err := m.midtrans.CreatePersonalTrainerTransaction(userData.Id.String(), email, req.Harga, req.Sesi)
+	transaction, err := m.midtrans.CreatePersonalTrainerTransaction(email, req.Harga, req.Sesi)
 	if err != nil {
 		return dto.TransactionResponseDto{}, err
 	}
