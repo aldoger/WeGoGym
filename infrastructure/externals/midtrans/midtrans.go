@@ -3,7 +3,9 @@ package midtrans
 import (
 	"go-kpl/internal/domain/models"
 	"os"
+	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
 )
@@ -57,6 +59,36 @@ func (m *MidtransClient) CreateMemberTransaction(userId string, email string, ko
 	return snapResp, nil
 }
 
-func (m *MidtransClient) CreatePersonalTrainerTransaction(userId string, email string, kode string, personalTrainerDetail models.UserPersonalTrainer) (*snap.Response, error) {
+func (m *MidtransClient) CreatePersonalTrainerTransaction(userId string, email string, harga int, sesi int) (*snap.Response, error) {
 
+	itemId := uuid.New()
+
+	itemName := "Personal trainer " + strconv.Itoa(sesi) + " sesi"
+
+	items := []midtrans.ItemDetails{
+		{
+			ID:    itemId.String(),
+			Name:  itemName,
+			Price: int64(harga),
+			Qty:   1,
+		},
+	}
+
+	req := &snap.Request{
+		TransactionDetails: midtrans.TransactionDetails{
+			OrderID:  userId,
+			GrossAmt: int64(harga),
+		},
+		CustomerDetail: &midtrans.CustomerDetails{
+			Email: email,
+		},
+		Items: &items,
+	}
+
+	snapResp, err := m.Client.CreateTransaction(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return snapResp, nil
 }

@@ -32,6 +32,9 @@ type User struct {
 }
 
 func (user *User) IsMember() bool {
+	if user.UserMembership == nil {
+		return false
+	}
 	return user.UserMembership.Verified
 }
 

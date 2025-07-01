@@ -9,6 +9,7 @@ import (
 func Transaction(server *gin.Engine, controller controllers.TransactionController) {
 	routes := server.Group("/api/transaction")
 	{
-		routes.POST("/", controller.CreateMemberTransaction)
+		routes.POST("/membership", controller.CreateMemberTransaction)
+		routes.POST("/personal-trainer", controller.CreatePersonalTrainerTransaction)
 	}
 }
