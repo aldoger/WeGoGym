@@ -45,7 +45,7 @@ func (r *userRepository) GetById(ctx context.Context, tx *gorm.DB, userId string
 	}
 
 	var user models.User
-	if err := tx.WithContext(ctx).
+	if err := tx.WithContext(ctx).Preload("UserPT").
 		Preload("UserMembership").
 		Take(&user, "id = ?", userId).Error; err != nil {
 		return models.User{}, err
@@ -53,6 +53,10 @@ func (r *userRepository) GetById(ctx context.Context, tx *gorm.DB, userId string
 
 	if user.UserMembership != nil && user.UserMembership.Id == uuid.Nil {
 		user.UserMembership = nil
+	}
+
+	if user.UserPT != nil && user.UserPT.Id == uuid.Nil {
+		user.UserPT = nil
 	}
 
 	return user, nil

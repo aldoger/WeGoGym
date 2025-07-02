@@ -18,4 +18,5 @@ type UserResponseDto struct {
 	Email          string                    `json:"email"`
 	Role           string                    `json:"role,omitempty"`
 	UserMembership UserMembershipResponseDto `json:"user_membership,omitempty"`
+	Sesi           int                       `json:"sesi"`
 }
