@@ -12,6 +12,10 @@ func (userPT *UserPersonalTrainer) UsedSession() {
 	userPT.Sesi--
 }
 
+func (userPT *UserPersonalTrainer) AddSession(sesi int) {
+	userPT.Sesi += sesi
+}
+
 func (UserPersonalTrainer) TableName() string {
 	return "UserPersonalTrainer"
 }

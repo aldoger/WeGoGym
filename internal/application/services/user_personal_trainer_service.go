@@ -11,7 +11,7 @@ import (
 
 type (
 	UserPersonalTrainerService interface {
-		CreateUserPersonalTrainer(ctx context.Context, req dto.CreateUserPersonalTrainerDto, userId string) (dto.UserPersonalTrainerResponse, error)
+		NewUserPersonalTrainerSesi(ctx context.Context, req dto.CreateUserPersonalTrainerDto, userId string) (dto.UserPersonalTrainerResponse, error)
 	}
 
 	userPersonalTrainerService struct {
@@ -24,7 +24,7 @@ func NewUserPersonalTrainerService(userPersonalRepository repository.UserPersona
 	return &userPersonalTrainerService{userPersonalTrainerRepository: userPersonalRepository, userRepository: userRepository}
 }
 
-func (s *userPersonalTrainerService) CreateUserPersonalTrainer(ctx context.Context, req dto.CreateUserPersonalTrainerDto, userId string) (dto.UserPersonalTrainerResponse, error) {
+func (s *userPersonalTrainerService) NewUserPersonalTrainerSesi(ctx context.Context, req dto.CreateUserPersonalTrainerDto, userId string) (dto.UserPersonalTrainerResponse, error) {
 
 	userData, err := s.userRepository.GetById(ctx, nil, userId)
 	if err != nil {
@@ -33,6 +33,23 @@ func (s *userPersonalTrainerService) CreateUserPersonalTrainer(ctx context.Conte
 
 	if !userData.IsMember() {
 		return dto.UserPersonalTrainerResponse{}, errors.New("user is not a member")
+	}
+
+	existingUserPT, err := s.userPersonalTrainerRepository.GetByUserId(ctx, nil, userData.Id)
+	if err != nil {
+		return dto.UserPersonalTrainerResponse{}, err
+	}
+
+	if existingUserPT != nil {
+		addUserSesi, err := s.userPersonalTrainerRepository.AddSession(ctx, nil, existingUserPT, req.Sesi)
+		if err != nil {
+			return dto.UserPersonalTrainerResponse{}, err
+		}
+
+		return dto.UserPersonalTrainerResponse{
+			Sesi:   addUserSesi.Sesi,
+			UserId: addUserSesi.UserId.String(),
+		}, nil
 	}
 
 	userPT := models.UserPersonalTrainer{

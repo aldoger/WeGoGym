@@ -38,7 +38,7 @@ func (c *userPersonalTrainerController) CreateUserPersonalTrainer(ctx *gin.Conte
 		return
 	}
 
-	userPT, err := c.userPersonalService.CreateUserPersonalTrainer(ctx, req, userId)
+	userPT, err := c.userPersonalService.NewUserPersonalTrainerSesi(ctx, req, userId)
 	if err != nil {
 		response.NewFailed("failed to make user personal trainer", myerror.New(err.Error(), http.StatusBadRequest)).Send(ctx)
 		return

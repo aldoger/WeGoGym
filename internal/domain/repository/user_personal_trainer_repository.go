@@ -12,6 +12,8 @@ import (
 type (
 	UserPersonalTrainerRepository interface {
 		Create(ctx context.Context, tx *gorm.DB, userPersonalTrainer models.UserPersonalTrainer) (models.UserPersonalTrainer, error)
+		GetByUserId(ctx context.Context, tx *gorm.DB, userId uuid.UUID) (*models.UserPersonalTrainer, error)
+		AddSession(ctx context.Context, tx *gorm.DB, userPersonalTrainer *models.UserPersonalTrainer, sesi int) (models.UserPersonalTrainer, error)
 		UseSession(ctx context.Context, tx *gorm.DB, userId uuid.UUID) (int, error)
 	}
 
@@ -61,4 +63,35 @@ func (r *userPersonalTrainerRepository) UseSession(ctx context.Context, tx *gorm
 	}
 
 	return userPT.Sesi, nil
+}
+
+func (r *userPersonalTrainerRepository) GetByUserId(ctx context.Context, tx *gorm.DB, userId uuid.UUID) (*models.UserPersonalTrainer, error) {
+	if tx == nil {
+		tx = r.db
+	}
+
+	var userPT models.UserPersonalTrainer
+	if err := tx.WithContext(ctx).Take(&userPT, "user_id = ?", userId).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &userPT, nil
+}
+
+func (r *userPersonalTrainerRepository) AddSession(ctx context.Context, tx *gorm.DB, userPersonalTrainer *models.UserPersonalTrainer, sesi int) (models.UserPersonalTrainer, error) {
+
+	if tx == nil {
+		tx = r.db
+	}
+
+	userPersonalTrainer.AddSession(sesi)
+
+	if err := tx.WithContext(ctx).Save(userPersonalTrainer).Error; err != nil {
+		return models.UserPersonalTrainer{}, err
+	}
+
+	return *userPersonalTrainer, nil
 }
