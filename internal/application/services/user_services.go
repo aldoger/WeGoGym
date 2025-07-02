@@ -86,6 +86,11 @@ func (s *userService) GetMeDataById(ctx context.Context, userId string) (dto.Use
 		userMembershipId = ""
 	}
 
+	userPTSesi := 0
+	if userData.UserPT != nil {
+		userPTSesi = userData.UserPT.Sesi
+	}
+
 	return dto.UserResponseDto{
 		Id:       userData.Id.String(),
 		Email:    userData.Email,
@@ -95,6 +100,7 @@ func (s *userService) GetMeDataById(ctx context.Context, userId string) (dto.Use
 			Id:        userMembershipId,
 			ExpiredAt: expiredAt,
 		},
+		Sesi: userPTSesi,
 	}, nil
 
 }
