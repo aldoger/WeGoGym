@@ -75,9 +75,14 @@ func (c *userController) Login(ctx *gin.Context) {
 
 func (c *userController) GetMe(ctx *gin.Context) {
 
-	userId := ctx.Param("id")
-	if userId == "" {
+	userId, err := ctx.Cookie("id")
+	if err != nil {
 		response.NewFailed("Id user not found", myerror.New("user id not provided", http.StatusBadRequest)).Send(ctx)
+		return
+	}
+
+	if userId == "" {
+		response.NewFailed("Id user not found", myerror.New("user session expired", http.StatusBadRequest)).Send(ctx)
 		return
 	}
 	user, err := c.userService.GetMeDataById(ctx, userId)
