@@ -112,10 +112,22 @@ func (c *userController) GenerateQrMe(ctx *gin.Context) {
 }
 
 func (c *userController) Logout(ctx *gin.Context) {
-	ctx.SetCookie("id", "", -1, "/", "", false, true)
-	ctx.SetCookie("email", "", -1, "/", "", false, true)
-	ctx.SetCookie("role", "", -1, "/", "", false, true)
-	ctx.SetCookie("username", "", -1, "/", "", false, true)
+
+	UserId, err := ctx.Cookie("id")
+	if err != nil {
+		response.NewFailed("user alreay logout", myerror.New("user alreay logout", http.StatusBadRequest)).Send(ctx)
+		return
+	}
+
+	if UserId == "" {
+		response.NewFailed("user alreay logout", myerror.New("user alreay logout", http.StatusBadRequest)).Send(ctx)
+		return
+	}
+
+	removeCookie(ctx, "id", "")
+	removeCookie(ctx, "email", "")
+	removeCookie(ctx, "role", "")
+	removeCookie(ctx, "username", "")
 
 	response.NewSuccess("logout successfully", nil).Send(ctx)
 }
@@ -131,6 +143,22 @@ func setCustomCookie(ctx *gin.Context, name, value string, maxAge int) {
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode,
 		Expires:  time.Now().Add(time.Duration(maxAge) * time.Second),
+	}
+
+	http.SetCookie(ctx.Writer, &cookie)
+}
+
+func removeCookie(ctx *gin.Context, name, value string) {
+	cookie := http.Cookie{
+		Name:     name,
+		Value:    value,
+		Path:     "/",
+		Domain:   "",
+		MaxAge:   -1,
+		Secure:   true, // wajib true untuk SameSite=None
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+		Expires:  time.Now().Add(-1 * time.Hour),
 	}
 
 	http.SetCookie(ctx.Writer, &cookie)
